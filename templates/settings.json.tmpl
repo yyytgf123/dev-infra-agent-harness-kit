@@ -1,0 +1,18 @@
+{
+  "//": "산출물: .claude/settings.json. step5(constitution)가 가드레일 훅을, 산출물 운영(evolution)이 observe를 등록.",
+  "//hooks": "safety=위험명령 차단(exit 2), circuit-breaker=자율루프 트립 시 정지(exit 2), tdd-gate=테스트없는 구현 차단(exit 2), observe=관찰(비차단, 항상 exit 0).",
+  "//matcher": "matcher는 도구 이름만 매칭(Bash/Edit/Write 등). 인자 분기는 훅이 stdin JSON을 파싱. 훅 사용 시 jq 필요.",
+  "//permissions": "자율 실행(execute.sh)은 --permission-mode acceptEdits로 돈다 — 파일편집 자동, Bash는 사람 확인. 안전 backstop은 아래 훅.",
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/safety.sh" }] },
+      { "matcher": "Read", "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/safety.sh" }] },
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/circuit-breaker.sh" }] },
+      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/tdd-gate.sh" }] },
+      { "matcher": "*", "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/observe.sh pre" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "*", "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/observe.sh post" }] }
+    ]
+  }
+}
